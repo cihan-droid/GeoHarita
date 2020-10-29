@@ -67,7 +67,7 @@ class _HaritaState extends State<Harita> {
   getData(String secim) async {
     try {
       final String url =
-          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lng.latitude},${lng.longitude}&radius=8000&type=$secim&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI';
+          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lng.latitude},${lng.longitude}&radius=8000&type=$secim&key=API_KEY';
       final response = await http.get(url);
 
       final int statusCode = response.statusCode;
