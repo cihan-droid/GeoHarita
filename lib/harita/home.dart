@@ -17,13 +17,13 @@ class _HaritaState extends State<Harita> {
   GoogleMapController _controller;
   Location _location = Location();
 
+  //Marker'lar ve BottomNavigationBar için başlangıç değeri verilmeli, verilen başlangıç değerleri:
   int secenek = 0;
   String sec = "pharmacy";
 
   @override
   void initState() {
     super.initState();
-
     getData(sec);
   }
 
@@ -34,14 +34,68 @@ class _HaritaState extends State<Harita> {
       lng = LatLng(l.latitude, l.longitude);
       _controller.animateCamera(
         CameraUpdate.newCameraPosition(
-          CameraPosition(target: LatLng(l.latitude, l.longitude), zoom: 14.5),
+          CameraPosition(target: LatLng(l.latitude, l.longitude), zoom: 12),
         ),
       );
-      getData(sec);
     });
+    getData(sec);
+  }
+
+  LatLng lng; //Ekranın bulunduğu konuma göre
+  void _onCameraMove(CameraPosition position) {
+    lng = position.target;
+  }
+
+  getData(String secim) async {
+    try {
+      final String url =
+          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lng.latitude},${lng.longitude}&radius=4000&type=$secim&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI';
+
+      final response = await http.get(url);
+      final int statusCode = response.statusCode;
+
+      if (statusCode == 201 || statusCode == 200) {
+        Map responseBody = json.decode(response.body);
+        List results = responseBody["results"];
+        Iterable _markers = Iterable.generate(results.length, (index) {
+          //results.lenght: Gelen results Listesinin uzunluğu sayısında marker oluşturur.
+          Map result = results[index];
+          Map location = result["geometry"]["location"];
+          String _title = result["name"]; //Marker noktasındaki işletmenin ismi
+          String _adres = result["vicinity"]; //İşletme adresi
+
+          LatLng latLngMarker = LatLng(
+            location["lat"],
+            location["lng"],
+          );
+
+          return Marker(
+            markerId: MarkerId("marker$index"),
+            position: latLngMarker,
+            infoWindow: InfoWindow(
+              title: _title,
+              snippet: _adres,
+              // anchor: Offset(0.0, 0.0),
+            ),
+          );
+        });
+        for (var i = 0; i < results.length; i++) {
+          _controller.hideMarkerInfoWindow(MarkerId("marker$i"));
+        }
+
+        setState(() {
+          markers = _markers;
+        });
+      } else {
+        throw Exception('Hata!');
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   changeMap(int a) {
+    //BottomNavigationBar seçili index kontrolü ve index değişikliği durumunda marker'ları güncelle.
     setState(() {
       if (a == 0) {
         sec = "pharmacy";
@@ -59,52 +113,12 @@ class _HaritaState extends State<Harita> {
     getData(sec);
   }
 
-  LatLng lng; //Ekranın bulunduğu konuma göre
-  void _onCameraMove(CameraPosition position) {
-    lng = position.target;
-  }
-
-  getData(String secim) async {
-    try {
-      final String url =
-          'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lng.latitude},${lng.longitude}&radius=8000&type=$secim&key=API_KEY';
-      final response = await http.get(url);
-
-      final int statusCode = response.statusCode;
-
-      if (statusCode == 201 || statusCode == 200) {
-        Map responseBody = json.decode(response.body);
-        List results = responseBody["results"];
-        Iterable _markers = Iterable.generate(5, (index) {
-          Map result = results[index];
-          Map location = result["geometry"]["location"];
-          String _title = result["name"];
-          LatLng latLngMarker = LatLng(
-            location["lat"],
-            location["lng"],
-          );
-          return Marker(
-              markerId: MarkerId("marker$index"),
-              position: latLngMarker,
-              infoWindow: InfoWindow(
-                title: _title,
-              ));
-        });
-
-        setState(() {
-          markers = _markers;
-        });
-      } else {
-        throw Exception('Hata!');
-      }
-    } catch (e) {
-      print(e.toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Harita Konum"),
+      ),
       body: Stack(
         children: <Widget>[
           GoogleMap(
@@ -112,7 +126,7 @@ class _HaritaState extends State<Harita> {
               markers,
             ),
             initialCameraPosition:
-                CameraPosition(target: _initialCameraPosition, zoom: 9),
+                CameraPosition(target: _initialCameraPosition, zoom: 14.5),
             mapType: MapType.terrain,
             onMapCreated: _onMapCreated,
             onCameraMove: _onCameraMove,
@@ -140,9 +154,6 @@ class _HaritaState extends State<Harita> {
             label: 'Akaryakıt',
           ),
         ],
-      ),
-      appBar: AppBar(
-        title: Text("Harita Konum"),
       ),
     );
   }
