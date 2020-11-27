@@ -46,11 +46,103 @@ class _HaritaState extends State<Harita> {
     lng = position.target;
   }
 
+  // 1. denemem
+
+  // getPic(String gorsel) async {
+  //   var imageData = BitmapDescriptor.defaultMarker;
+  //   // var _list = photoList.iterator;
+  //   // print(photoList[0]);
+  //   // print(_list);
+
+  //   try {
+  //     final String picUrl =
+  //         "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$gorsel&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI";
+
+  //     final responsePic = await http.get(picUrl);
+  //     final int picStatusCode = responsePic.statusCode;
+  //     print("responsePic StatusCode: ${responsePic.statusCode}");
+  //     if (picStatusCode == 201 || picStatusCode == 200) {
+  //       imageData = await json.decode(responsePic.body);
+  //     }
+  //   } catch (e) {
+  //     print(e.toString());
+  //   }
+  //   return imageData;
+  // }
+
+  // 2. denemem
+
+  // getPic(String yazi) async {
+  //   //   // var imageData;
+  //   //   // print("PhotoRef: $yazi");
+  //   //   // try {
+  //   //   //   final String picUrl =
+  //   //   //       "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$yazi&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI";
+
+  //   //   //   final responsePic = await http.get(picUrl).then((value) => imageData);
+  //   //   //   final int picStatusCode = responsePic.statusCode;
+  //   //   //   print("responsePic StatusCode: ${responsePic.statusCode}");
+  //   //   //   // if (picStatusCode == 201 || picStatusCode == 200) {
+  //   //   //   //   // imageData = BitmapDescriptor.fromBytes(responsePic.bodyBytes);
+  //   //   //   //   imageData = json.decode(responsePic.body);
+  //   //   //   // }
+  //   //   // } catch (e) {
+  //   //   //   print(e.toString());
+  //   //   // }
+  //   //   // return imageData;
+
+  //   // **** 3. Denemem, üstteki kısmı metod içerisinde yoruma alıp alttaki halini denemiştim. ****
+
+  //   //   // String imageUrl =
+  //   //   //     "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$yazi&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI";
+  //   //   // final http.Response response = await http.get(imageUrl);
+
+  //   //   // BitmapDescriptor.fromBytes(response.bodyBytes);
+
+  //   //   // final int targetWidth = 60;
+  //   //   // final File markerImageFile =
+  //   //   //     await DefaultCacheManager().getSingleFile(imageUrl);
+
+  //   //   // final Uint8List markerImageBytes = await markerImageFile.readAsBytes();
+
+  //   //   // final markerImageCodec =
+  //   //   //     await instantiateImageCodec(markerImageBytes, targetWidth: targetWidth);
+
+  //   //   // final FrameInfo frameInfo = await markerImageCodec.getNextFrame();
+
+  //   //   // final ByteData byteData = await frameInfo.image.toByteData(
+  //   //   //   format: ImageByteFormat.png,
+  //   //   // );
+
+  //   //   // final Uint8List resizedMarkerImageBytes = byteData.buffer.asUint8List();
+
+  //   //   // BitmapDescriptor.fromBytes(resizedMarkerImageBytes);
+  //   //   // return resizedMarkerImageBytes;
+
+  //   // ***** 4. denemem *****
+
+  //   // Metod, yorumların üzerinde başlıyor.
+
+  //   var iconUrl =
+  //       "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${yazi}&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI";
+  //   var dataBytes;
+  //   var request = await http.get(
+  //       iconUrl); //Debug sırasında buraya ve bir alt satıra break point koyduğumda isteğin buraya geldiğini görebiliyorum, ancak bu GET isteği yapıldıktan sonra hata veriyor, alttaki satırdan devam etmiyor.
+  //   var bytes = request.bodyBytes;
+
+  //   setState(() {
+  //     dataBytes = bytes;
+  //   });
+
+  //   return dataBytes.buffer.asUint8List();
+  // }
+
   getData(String secim) async {
     try {
       final String url =
           'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lng.latitude},${lng.longitude}&radius=4000&type=$secim&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI';
 
+      print("Çalışıyor...");
       final response = await http.get(url);
       final int statusCode = response.statusCode;
 
@@ -60,14 +152,56 @@ class _HaritaState extends State<Harita> {
         Iterable _markers = Iterable.generate(results.length, (index) {
           //results.lenght: Gelen results Listesinin uzunluğu sayısında marker oluşturur.
           Map result = results[index];
-          Map location = result["geometry"]["location"];
-          String _title = result["name"]; //Marker noktasındaki işletmenin ismi
-          String _adres = result["vicinity"]; //İşletme adresi
+          print(results[index]);
 
+          Map location = result["geometry"]["location"];
           LatLng latLngMarker = LatLng(
             location["lat"],
             location["lng"],
           );
+
+          // **** Burada bulunan yoruma alınmış satırlarla bu metod içerisinde de Places API çağrısı için deneme yapmıştım. ******
+
+          // String photoUrlString = result["photos"][0][
+          //     "photo_reference"]; //API'de bulunan photo_reference key'ini elde edebilmek için.
+          // final String picUrl =
+          //     "https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=$photoUrlString&key=AIzaSyA_npCi92eXFj_r73CidIM3f_CArsra_NI";
+
+          // final responsePic = await http.get(picUrl);
+          // // final int picStatusCode = responsePic.statusCode;
+          // print("responsePic StatusCode: ${responsePic.statusCode}");
+          // // if (picStatusCode == 201 || picStatusCode == 200) {
+          // //   imageData = BitmapDescriptor.fromBytes(responsePic.bodyBytes);
+          // // }
+          // imageData = BitmapDescriptor.fromBytes(responsePic.bodyBytes);
+
+          print("Location: $location");
+          String _title = result["name"]; //Marker noktasındaki işletmenin ismi
+          print("Title: $_title");
+          String _adres = result["vicinity"]; //İşletme adresi
+          // List sonuc = result["photos"];
+          // var picString = sonuc["photo_reference"];
+
+          // String gorsel = result["photos"]["photo_reference"];  HATALI ÇAĞRI
+          // print(gorsel);
+
+          // var photoRef =
+          //     result["photos"]["photo_reference"]; //Photos bilgileri için  HATALI ÇAĞRI
+          // print(photoRef);
+          // BitmapDescriptor test = getPic(result["photos"]);
+          bool infoCheck(MarkerId id) {
+            _controller.isMarkerInfoWindowShown(id).then((value) {
+              return value;
+            });
+            return false;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            // Farklı seçenek seçildiğinde marker pin'leri üzerinde açık olan bütün InfOWindow pencerelerini kapatır. VSCode Üzerinde hata veriyor, CMD ile çalıştırılınca hata mesajı vermiyor! *****
+            if (infoCheck(MarkerId("marker$i")) == true) {
+              _controller.hideMarkerInfoWindow(MarkerId("marker$i"));
+            }
+          }
 
           return Marker(
             markerId: MarkerId("marker$index"),
@@ -77,11 +211,9 @@ class _HaritaState extends State<Harita> {
               snippet: _adres,
               // anchor: Offset(0.0, 0.0),
             ),
+            // icon: BitmapDescriptor(getPic(photoUrlString)),
           );
         });
-        for (var i = 0; i < results.length; i++) {
-          _controller.hideMarkerInfoWindow(MarkerId("marker$i"));
-        }
 
         setState(() {
           markers = _markers;
