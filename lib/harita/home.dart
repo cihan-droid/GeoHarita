@@ -12,6 +12,7 @@ class Harita extends StatefulWidget {
 }
 
 class _HaritaState extends State<Harita> {
+  var markerSayisi = 0;
   Iterable markers = [];
   LatLng _initialCameraPosition = LatLng(40.2228416, 28.8628205);
   GoogleMapController _controller;
@@ -27,7 +28,7 @@ class _HaritaState extends State<Harita> {
     getData(sec);
   }
 
-  void _onMapCreated(GoogleMapController _cntrl) {
+  void _onMapCreated(GoogleMapController _cntrl) async {
     _controller = _cntrl;
 
     _location.onLocationChanged.listen((l) {
@@ -38,7 +39,7 @@ class _HaritaState extends State<Harita> {
         ),
       );
     });
-    getData(sec);
+    await getData(sec);
   }
 
   LatLng lng; //Ekranın bulunduğu konuma göre
@@ -53,6 +54,24 @@ class _HaritaState extends State<Harita> {
 
       final response = await http.get(url);
       final int statusCode = response.statusCode;
+
+      for (var i = 0; i < markerSayisi; i++) {
+        _checkWindow() async {
+          final marker = MarkerId("marker$i");
+          print(marker.toString());
+          try {
+            bool window = await _controller.isMarkerInfoWindowShown(marker);
+            if (window) {
+              _controller.hideMarkerInfoWindow(marker);
+            }
+          } catch (e) {
+            print(e.toString());
+          }
+        }
+
+        await _checkWindow();
+        print(i);
+      }
 
       if (statusCode == 201 || statusCode == 200) {
         Map responseBody = json.decode(response.body);
@@ -79,9 +98,7 @@ class _HaritaState extends State<Harita> {
             ),
           );
         });
-        for (var i = 0; i < results.length; i++) {
-          _controller.hideMarkerInfoWindow(MarkerId("marker$i"));
-        }
+        markerSayisi = results.length;
 
         setState(() {
           markers = _markers;
@@ -94,7 +111,7 @@ class _HaritaState extends State<Harita> {
     }
   }
 
-  changeMap(int a) {
+  changeMap(int a) async {
     //BottomNavigationBar seçili index kontrolü ve index değişikliği durumunda marker'ları güncelle.
     setState(() {
       if (a == 0) {
@@ -110,7 +127,7 @@ class _HaritaState extends State<Harita> {
         secenek = 2;
       }
     });
-    getData(sec);
+    await getData(sec);
   }
 
   @override
